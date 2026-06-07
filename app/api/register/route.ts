@@ -9,6 +9,8 @@ interface RegistrationData {
   phone: string;
   password: string;
   institution: string;
+  role: string;
+  status: string;
 }
 
 async function ensureFileHeader(filePath: string): Promise<void> {
@@ -17,16 +19,16 @@ async function ensureFileHeader(filePath: string): Promise<void> {
     if (stats.size === 0) {
       const header =
         "# Registration Submissions\n\n" +
-        "| Timestamp | Full Name | Username | Password | Email | Phone | Institution |\n" +
-        "|-----------|-----------|----------|----------|-------|------|-------------|\n";
+        "| Timestamp | Full Name | Username | Password | Email | Phone | Institution | Role | Status |\n" +
+        "|-----------|-----------|----------|----------|-------|------|-------------|------|--------|\n";
       await fs.writeFile(filePath, header);
     }
   } catch {
     // File does not exist — create it with header
     const header =
       "# Registration Submissions\n\n" +
-      "| Timestamp | Full Name | Username | Password | Email | Phone | Institution |\n" +
-      "|-----------|-----------|----------|----------|-------|------|-------------|\n";
+      "| Timestamp | Full Name | Username | Password | Email | Phone | Institution | Role | Status |\n" +
+      "|-----------|-----------|----------|----------|-------|------|-------------|------|--------|\n";
     await fs.writeFile(filePath, header);
   }
 }
@@ -133,6 +135,18 @@ function validateRegistration(data: RegistrationData): string[] {
     errors.push("Institution is required");
   }
 
+  if (!data.role?.trim()) {
+    errors.push("Role is required");
+  } else if (!["HRO", "HRRP"].includes(data.role)) {
+    errors.push("Role must be HRO or HRRP");
+  }
+
+  if (!data.status?.trim()) {
+    errors.push("Status is required");
+  } else if (data.status !== "Active") {
+    errors.push("Status must be Active");
+  }
+
   return errors;
 }
 
@@ -146,6 +160,8 @@ export async function POST(request: NextRequest) {
       phone: body.phone || "",
       password: body.password || "",
       institution: body.institution || "",
+      role: body.role || "",
+      status: body.status || "Active",
     };
 
     const errors = validateRegistration(data);
@@ -157,7 +173,7 @@ export async function POST(request: NextRequest) {
     }
 
     const timestamp = new Date().toISOString();
-    const row = `| ${timestamp} | ${escapeMarkdown(data.fullName)} | ${escapeMarkdown(data.username)} | ${escapeMarkdown(data.password)} | ${escapeMarkdown(data.email)} | ${escapeMarkdown(data.phone)} | ${escapeMarkdown(data.institution)} |\n`;
+    const row = `| ${timestamp} | ${escapeMarkdown(data.fullName)} | ${escapeMarkdown(data.username)} | ${escapeMarkdown(data.password)} | ${escapeMarkdown(data.email)} | ${escapeMarkdown(data.phone)} | ${escapeMarkdown(data.institution)} | ${escapeMarkdown(data.role)} | ${escapeMarkdown(data.status)} |\n`;
 
     const filePath = path.join(process.cwd(), "submissions.md");
     await ensureFileHeader(filePath);

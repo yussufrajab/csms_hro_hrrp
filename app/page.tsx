@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   AlertCircle,
   ShieldCheck,
+  ChevronDown,
 } from "lucide-react";
 
 export default function RegistrationPage() {
@@ -26,6 +27,8 @@ export default function RegistrationPage() {
     phone: "",
     password: "",
     institution: "",
+    role: "",
+    status: "Active",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
@@ -69,6 +72,12 @@ export default function RegistrationPage() {
       newErrors.institution = "Institution is required";
     }
 
+    if (!formData.role.trim()) {
+      newErrors.role = "Role is required";
+    } else if (!["HRO", "HRRP"].includes(formData.role)) {
+      newErrors.role = "Role must be HRO or HRRP";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -106,7 +115,7 @@ export default function RegistrationPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
@@ -275,6 +284,51 @@ export default function RegistrationPage() {
               {errors.institution && (
                 <p className="text-red-500 text-sm mt-1">{errors.institution}</p>
               )}
+            </div>
+
+            {/* Role */}
+            <div className="relative">
+              <Label htmlFor="role" className="text-sm font-medium">
+                Role
+              </Label>
+              <div className="relative mt-1">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <select
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className={`w-full pl-10 pr-10 py-2 rounded-md border border-input bg-background text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-ring ${errors.role ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                >
+                  <option value="">Select role</option>
+                  <option value="HRO">HRO</option>
+                  <option value="HRRP">HRRP</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+              </div>
+              {errors.role && (
+                <p className="text-red-500 text-sm mt-1">{errors.role}</p>
+              )}
+            </div>
+
+            {/* Status */}
+            <div className="relative">
+              <Label htmlFor="status" className="text-sm font-medium">
+                Status
+              </Label>
+              <div className="relative mt-1">
+                <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  id="status"
+                  name="status"
+                  value={formData.status}
+                  readOnly
+                  disabled
+                  className="pl-10 bg-muted/50 cursor-not-allowed"
+                />
+              </div>
             </div>
 
             {/* Submit Button */}
