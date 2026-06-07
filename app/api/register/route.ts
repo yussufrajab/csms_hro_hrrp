@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
+import { INSTITUTION_NAMES } from "@/lib/institutions";
 
 interface RegistrationData {
   fullName: string;
@@ -133,6 +134,8 @@ function validateRegistration(data: RegistrationData): string[] {
 
   if (!data.institution?.trim()) {
     errors.push("Institution is required");
+  } else if (!INSTITUTION_NAMES.includes(data.institution)) {
+    errors.push("Invalid institution");
   }
 
   if (!data.role?.trim()) {

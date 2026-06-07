@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { InstitutionCombobox } from "@/components/ui/institution-combobox";
+import { INSTITUTION_NAMES } from "@/lib/institutions";
 import { Button } from "@/components/ui/button";
 import {
   User,
@@ -11,7 +13,6 @@ import {
   Mail,
   Phone,
   Key,
-  Building2,
   Loader2,
   CheckCircle2,
   AlertCircle,
@@ -70,6 +71,8 @@ export default function RegistrationPage() {
 
     if (!formData.institution.trim()) {
       newErrors.institution = "Institution is required";
+    } else if (!INSTITUTION_NAMES.includes(formData.institution)) {
+      newErrors.institution = "Please select a valid institution from the list";
     }
 
     if (!formData.role.trim()) {
@@ -271,14 +274,14 @@ export default function RegistrationPage() {
                 Institution
               </Label>
               <div className="relative mt-1">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="institution"
-                  name="institution"
+                <InstitutionCombobox
                   value={formData.institution}
-                  onChange={handleChange}
-                  placeholder="Enter your institution"
-                  className={`pl-10 ${errors.institution ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                  onChange={(value) => {
+                    setFormData((prev) => ({ ...prev, institution: value }));
+                    if (errors.institution) setErrors((prev) => ({ ...prev, institution: "" }));
+                  }}
+                  error={errors.institution}
+                  placeholder="Search or type institution"
                 />
               </div>
               {errors.institution && (
